@@ -10,11 +10,12 @@ import com.example.cryptoapp.presentation.adapters.CoinInfoAdapter
 class CoinPriceListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: CoinViewModel
-    private lateinit var binding: ActivityCoinPrceListBinding
+    private val binding by lazy {
+        ActivityCoinPrceListBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCoinPrceListBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val adapter = CoinInfoAdapter(this)
         adapter.onCoinClickListener = object : CoinInfoAdapter.OnCoinClickListener {
