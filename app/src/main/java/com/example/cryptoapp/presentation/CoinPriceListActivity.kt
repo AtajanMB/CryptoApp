@@ -3,7 +3,8 @@ package com.example.cryptoapp.presentation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.example.cryptoapp.databinding.ActivityCoinPrceListBinding
+import com.example.cryptoapp.R
+import com.example.cryptoapp.databinding.ActivityCoinPriceListBinding
 import com.example.cryptoapp.domain.CoinInfo
 import com.example.cryptoapp.presentation.adapters.CoinInfoAdapter
 
@@ -11,7 +12,7 @@ class CoinPriceListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: CoinViewModel
     private val binding by lazy {
-        ActivityCoinPrceListBinding.inflate(layoutInflater)
+        ActivityCoinPriceListBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,17 +21,42 @@ class CoinPriceListActivity : AppCompatActivity() {
         val adapter = CoinInfoAdapter(this)
         adapter.onCoinClickListener = object : CoinInfoAdapter.OnCoinClickListener {
             override fun onCoinClick(coinPriceInfo: CoinInfo) {
-                val intent = CoinDetailActivity.newIntent(
-                    this@CoinPriceListActivity,
-                    coinPriceInfo.fromSymbol
-                )
-                startActivity(intent)
+                if (isOnePaneMode()){
+                    launchActivity(coinPriceInfo.fromSymbol)
+                }else{
+                    launchFragment(coinPriceInfo.fromSymbol)
+                }
+
             }
         }
         binding.rvCoinPriceList.adapter = adapter
+        binding.rvCoinPriceList.itemAnimator = null
         viewModel = ViewModelProvider(this)[CoinViewModel::class.java]
         viewModel.coinInfoList.observe(this) {
-            adapter.coinInfoList = it
+            adapter.submitList(it)
         }
+
     }
+
+    private fun launchFragment(fromSymbol: String) {
+        supportFragmentManager.popBackStack()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_container,
+                CoinDetailFragment.newInstance(fromSymbol)
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun launchActivity(fromSymbol: String) {
+        val intent = CoinDetailActivity.newIntent(
+            this@CoinPriceListActivity,
+            fromSymbol
+        )
+        startActivity(intent)
+    }
+
+    private fun isOnePaneMode() = binding.fragmentContainer == null
 }
